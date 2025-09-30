@@ -1,30 +1,38 @@
-use std::collections::HashMap;
-use axum::{
-    extract::{Form, Path, Query, State},
-    http::StatusCode,
-    response::{Html, IntoResponse, Redirect, Response},
-    routing::{get, post},
-    Router,
-};
-use axum_login::AuthSession;
-use tera::Context;
-use serde::{Deserialize, Serialize};
 use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHasher,
 };
+use axum::{
+    extract::{Form, Path, Query, State},
+    http::StatusCode,
+    response::{Html, IntoResponse, Redirect, Response},
+    routing::get,
+    Router,
+};
+use axum_login::AuthSession;
 use gray_matter::{engine::YAML, Matter, ParsedEntity};
 use pulldown_cmark::{html, Parser};
+use serde::{Deserialize, Serialize};
+use tera::Context;
 use tower_http::services::ServeDir;
 use walkdir::WalkDir;
 
-use crate::AppState;
 use crate::auth::{Backend, Credentials};
+use crate::AppState;
 
 // --- Data Structures ---
 #[derive(Debug, Deserialize, Serialize)] struct ProblemMeta { title: String, time_limit: String, memory_limit: String, tags: Vec<String> }
 #[derive(Debug, Serialize)] struct ProblemListItem { id: u32, title: String, accuracy: String }
-#[derive(Debug, Serialize)] struct ProblemDetailView { id: u32, meta: ProblemMeta, content: String, total_submits: i64, correct_submits: i64, accuracy: String }
+#[derive(Debug, Serialize)] struct ProblemDetailView {
+    id: u32,
+    meta: ProblemMeta,
+    content: String,
+    total_submits: i64,
+    correct_submits: i64,
+    accuracy: String,
+    example_inputs: Vec<String>,
+    example_outputs: Vec<String>,
+}
 #[derive(Deserialize)] pub struct AuthQuery { error: Option<String> }
 pub struct AppError(anyhow::Error);
 
@@ -88,23 +96,99 @@ async fn problems_list( State(state): State<AppState>, auth_session: AuthSession
 }
 
 #[axum::debug_handler]
-async fn problem_detail( State(state): State<AppState>, auth_session: AuthSession<Backend>, Path(problem_id): Path<u32>) -> Result<Html<String>, AppError> {
+async fn problem_detail(
+    State(state): State<AppState>,
+    auth_session: AuthSession<Backend>,
+    Path(problem_id): Path<u32>,
+) -> Result<Html<String>, AppError> {
     let folder_num = if problem_id == 0 { 0 } else { ((problem_id - 1) / 1000 + 1) * 1000 };
     let file_path = format!("problems/{:06}/{}.md", folder_num, problem_id);
     let content = tokio::fs::read_to_string(&file_path).await?;
+
     let matter = Matter::<YAML>::new();
     let parsed_entity = matter.parse(&content);
-    let meta: ProblemMeta = parsed_entity.data.ok_or_else(|| anyhow::anyhow!("Front matter missing"))?.deserialize()?;
+    let meta: ProblemMeta = parsed_entity.data
+        .ok_or_else(|| anyhow::anyhow!("Front matter missing"))?
+        .deserialize()?;
     let parser = Parser::new(&parsed_entity.content);
+    let (main_content, example_inputs, example_outputs) = extract_examples(&parsed_entity.content);
+
+    let parser = Parser::new(&main_content);
     let mut html_content = String::new();
     html::push_html(&mut html_content, parser);
-    let view_data = ProblemDetailView { id: problem_id, meta, content: html_content, total_submits: 0, correct_submits: 0, accuracy: "0.000%".to_string() };
+
+    let view_data = ProblemDetailView {
+        id: problem_id,
+        meta,
+        content: html_content,
+        total_submits: 0,
+        correct_submits: 0,
+        accuracy: "0.000%".to_string(),
+        example_inputs,
+        example_outputs,
+    };
+
     let mut context = Context::new();
     context.insert("problem", &view_data);
     context.insert("active_page", "problems");
     context.insert("current_user", &auth_session.user);
     let rendered = state.tera.render("problem.html", &context)?;
     Ok(Html(rendered))
+}
+
+
+fn extract_examples(content: &str) -> (String, Vec<String>, Vec<String>) {
+    let mut main_content = String::new();
+    let mut example_inputs = Vec::new();
+    let mut example_outputs = Vec::new();
+
+    let lines: Vec<&str> = content.lines().collect();
+    let mut i = 0;
+
+    while i < lines.len() {
+        let line = lines[i];
+
+        if line.starts_with("### 예제 입력") {
+            // 예제 입력 블록 찾기
+            i += 1;
+            if i < lines.len() && lines[i] == "```" {
+                i += 1;
+                let mut input_content = String::new();
+                while i < lines.len() && lines[i] != "```" {
+                    if !input_content.is_empty() {
+                        input_content.push('\n');
+                    }
+                    input_content.push_str(lines[i]);
+                    i += 1;
+                }
+                example_inputs.push(input_content);
+            }
+        } else if line.starts_with("### 예제 출력") {
+            // 예제 출력 블록 찾기
+            i += 1;
+            if i < lines.len() && lines[i] == "```" {
+                i += 1;
+                let mut output_content = String::new();
+                while i < lines.len() && lines[i] != "```" {
+                    if !output_content.is_empty() {
+                        output_content.push('\n');
+                    }
+                    output_content.push_str(lines[i]);
+                    i += 1;
+                }
+                example_outputs.push(output_content);
+            }
+        } else {
+            // 일반 내용을 main_content에 추가
+            if !main_content.is_empty() {
+                main_content.push('\n');
+            }
+            main_content.push_str(line);
+        }
+        i += 1;
+    }
+
+    (main_content, example_inputs, example_outputs)
 }
 
 // --- Authentication Handlers (FIXED) ---

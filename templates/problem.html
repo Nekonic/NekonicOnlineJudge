@@ -40,24 +40,28 @@
   </div>
 
   <!-- 예제 입출력 -> 카드로 변경 -->
+  {% if problem.example_inputs or problem.example_outputs %}
   <div class="row">
-    <div class="col-md-6">
+    {% for i in range(end=problem.example_inputs | length) %}
+    <div class="col-md-6 mb-3">
       <div class="card">
-        <div class="card-header"><strong>예제 입력 1</strong></div>
+        <div class="card-header"><strong>예제 입력 {{ i + 1 }}</strong></div>
         <div class="card-body bg-light">
-          <pre class="mb-0"><code>입력 예시가 여기에 들어갑니다.</code></pre>
+          <pre class="mb-0"><code>{{ problem.example_inputs[i] | default(value="") }}</code></pre>
         </div>
       </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 mb-3">
       <div class="card">
-        <div class="card-header"><strong>예제 출력 1</strong></div>
+        <div class="card-header"><strong>예제 출력 {{ i + 1 }}</strong></div>
         <div class="card-body bg-light">
-          <pre class="mb-0"><code>{{ problem.example_output | default(value="예제 출력이 없습니다.") }}</code></pre>
+          <pre class="mb-0"><code>{{ problem.example_outputs[i] | default(value="") }}</code></pre>
         </div>
       </div>
     </div>
+    {% endfor %}
   </div>
+  {% endif %}
 </div>
 {% endblock content %}
 
