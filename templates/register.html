@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}회원가입 - Nekonic OJ{% endblock title %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="h3 mb-0">회원가입</h1>
+            </div>
+            <div class="card-body">
+                {# 에러 메시지가 있으면 표시합니다. #}
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+                {% endif %}
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">사용자 이름</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">비밀번호</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="form-text">
+                            비밀번호는 8자 이상으로 설정해주세요.
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">회원가입</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

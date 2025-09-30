@@ -1,0 +1,38 @@
+[package]
+name = "NekonicOnlineJudge"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Web Framework & Routing
+axum = { version = "0.7.5", features = ["macros"] }
+tower-http = { version = "0.5.2", features = ["fs"] }
+
+# Authentication & Sessions
+axum-login = "0.14.0"
+tower-sessions = "0.11.0"
+tower-sessions-sqlx-store = { version = "0.11.0", features = ["sqlite"] }
+argon2 = "0.5.3"
+rand = "0.8.5"
+
+# Database
+sqlx = { version = "0.7.4", features = ["runtime-tokio", "sqlite", "macros"] }
+
+# Templating Engine
+tera = "1.19.1"
+
+# Async Runtime
+tokio = { version = "1.37.0", features = ["full"] }
+
+# Data Handling & Parsing
+serde = { version = "1.0.203", features = ["derive"] }
+serde_yaml = "0.9.34"
+gray_matter = "0.2.2"
+pulldown-cmark = "0.10.0"
+
+# Utility & Error Handling
+anyhow = "1.0.86"
+async-trait = "0.1.80"
+dotenvy = "0.15.7"
+time = { version = "0.3.36", features = ["serde-well-known"] }
+walkdir = "2.5.0"

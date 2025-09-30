@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}{{ problem.id }}번: {{ problem.meta.title }} - Nekonic OJ{% endblock title %}
+
+{% block content %}
+<!-- 상단 메뉴 -->
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">문제</a></li>
+  <li class="nav-item"><a class="nav-link" href="#">제출</a></li>
+  <li class="nav-item"><a class="nav-link" href="#">채점 현황</a></li>
+  <li class="nav-item"><a class="nav-link" href="#">게시판</a></li>
+</ul>
+
+<!-- 문제 제목 -->
+<div class="d-flex align-items-center mb-3">
+  <h1 class="me-3 mb-0">{{ problem.meta.title }}</h1>
+  {% for tag in problem.meta.tags %}
+  <span class="badge rounded-pill bg-secondary fw-normal">{{ tag }}</span>
+  {% endfor %}
+</div>
+
+<!-- 문제 정보 테이블 -> 카드로 변경 -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row text-center">
+      <div class="col"><strong>시간 제한</strong><br>{{ problem.meta.time_limit }}</div>
+      <div class="col"><strong>메모리 제한</strong><br>{{ problem.meta.memory_limit }}</div>
+      <div class="col"><strong>제출</strong><br>{{ problem.total_submits }}</div>
+      <div class="col"><strong>정답</strong><br>{{ problem.correct_submits }}</div>
+      <div class="col"><strong>정답 비율</strong><br>{{ problem.accuracy }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- 문제 내용 (각 섹션을 테두리로 구분) -->
+<div id="problem-content">
+  <div class="problem-section mb-5">
+    <h3 class="border-bottom pb-2 mb-3">문제</h3>
+    {{ problem.content | safe }}
+  </div>
+
+  <!-- 예제 입출력 -> 카드로 변경 -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header"><strong>예제 입력 1</strong></div>
+        <div class="card-body bg-light">
+          <pre class="mb-0"><code>입력 예시가 여기에 들어갑니다.</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header"><strong>예제 출력 1</strong></div>
+        <div class="card-body bg-light">
+          <pre class="mb-0"><code>{{ problem.example_output | default(value="예제 출력이 없습니다.") }}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+

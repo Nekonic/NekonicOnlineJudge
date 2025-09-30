@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}문제 목록 - Nekonic OJ{% endblock title %}
+
+{% block content %}
+<h1 class="mb-4">문제 목록</h1>
+<table class="table table-hover">
+  <thead class="table-light">
+  <tr>
+    <th scope="col">문제 번호</th>
+    <th scope="col">제목</th>
+    <th scope="col">정답 비율</th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for problem in problems %}
+  <tr>
+    <th scope="row">{{ problem.id }}</th>
+    <td><a href="/problems/{{ problem.id }}" class="text-decoration-none">{{ problem.title }}</a></td>
+    <td>{{ problem.accuracy }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock content %}

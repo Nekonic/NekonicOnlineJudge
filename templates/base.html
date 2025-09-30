@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 템플릿 변수를 사용해 페이지마다 다른 제목을 보여줍니다 -->
+  <title>{% block title %}Nekonic OJ{% endblock title %}</title>
+
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link href="/static/css/bootstrap.css" rel="stylesheet">
+
+  <style>
+    /* Pretendard 폰트를 전체 페이지에 적용 */
+    body {
+      font-family: "Pretendard", sans-serif;
+    }
+    .sidebar {
+      width: 250px;
+      flex-shrink: 0;
+      position: sticky; /* 1. 스티키 포지션 적용 */
+      top: 0;           /* 2. 화면 상단에 고정 */
+      align-self: flex-start; /* 3. d-flex 컨테이너 내에서 상단 정렬 */
+      height: 100vh;    /* 4. 높이는 화면 전체 높이로 유지 */
+    }
+    .content-wrapper {
+      max-width: 960px;
+      margin: 0 auto; /* 가운데 정렬 */
+    }
+  </style>
+</head>
+<body class="bg-light">
+<div class="d-flex">
+  <!-- 사이드바 (모든 페이지 공통) -->
+  <aside class="sidebar vh-100 p-3 d-flex flex-column bg-dark text-white">
+    <a href="/" class="d-flex align-items-center mb-3 text-white text-decoration-none">
+      <span class="fs-4">Nekonic OJ</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+      <!-- 'active_page' 변수를 받아와서 현재 페이지 메뉴를 활성화합니다 -->
+      <li class="nav-item"><a href="/learn" class="nav-link text-white {% if active_page == 'learn' %}active{% endif %}">학습</a></li>
+      <li><a href="/community" class="nav-link text-white {% if active_page == 'community' %}active{% endif %}">게시판</a></li>
+      <li><a href="/problems" class="nav-link text-white {% if active_page == 'problems' %}active{% endif %}">문제</a></li>
+      <li><a href="/contests" class="nav-link text-white {% if active_page == 'contests' %}active{% endif %}">대회</a></li>
+      <li><a href="/rankings" class="nav-link text-white {% if active_page == 'rankings' %}active{% endif %}">랭킹</a></li>
+    </ul>
+    <div class="dropdown">
+      {% if current_user %}
+      <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <strong>{{ current_user.username }}</strong>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+        <li><a class="dropdown-item" href="/logout">로그아웃</a></li>
+      </ul>
+      {% else %}
+      <div>
+        <a href="/login" class="btn btn-outline-light btn-sm">로그인</a>
+        <a href="/register" class="btn btn-primary btn-sm">회원가입</a>
+      </div>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- 3. 메인 콘텐츠 영역 수정 -->
+  <main class="flex-grow-1 p-4 p-md-5">
+    <div class="content-wrapper">
+      {% block content %}{% endblock content %}
+    </div>
+  </main>
+</div>
+<script src="/static/js/bootstrap.bundle.js"></script>
+</body>
+</html>
