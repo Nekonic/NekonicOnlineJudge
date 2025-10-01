@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}제출 #{{ submission_detail.submission.id }} - Nekonic OJ{% endblock title %}
+{% block content %}
+
+<!-- 뒤로 가기 버튼 -->
+<div class="mb-3">
+    <a href="/problems/{{ submission_detail.submission.problem_id }}/status" class="btn btn-outline-secondary">
+        ← 채점 현황으로 돌아가기
+    </a>
+</div>
+
+<!-- 제출 정보 카드 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="mb-0">제출 #{{ submission_detail.submission.id }}</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <td><strong>사용자:</strong></td>
+                        <td>{{ submission_detail.submission.username }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>언어:</strong></td>
+                        <td>{{ submission_detail.submission.language }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>제출 시간:</strong></td>
+                        <td>{{ submission_detail.submission.submitted_at }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>채점 완료:</strong></td>
+                        <td>{% if submission_detail.submission.judged_at %}{{ submission_detail.submission.judged_at }}{% else %}진행 중...{% endif %}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <td><strong>결과:</strong></td>
+                        <td>
+                            <span class="badge 
+                                {% if submission_detail.submission.status == 'ACCEPTED' %}bg-success
+                                {% elif submission_detail.submission.status == 'WRONG_ANSWER' %}bg-danger
+                                {% elif submission_detail.submission.status == 'TIME_LIMIT_EXCEEDED' %}bg-warning
+                                {% elif submission_detail.submission.status == 'MEMORY_LIMIT_EXCEEDED' %}bg-warning
+                                {% elif submission_detail.submission.status == 'RUNTIME_ERROR' %}bg-danger
+                                {% elif submission_detail.submission.status == 'COMPILATION_ERROR' %}bg-dark
+                                {% elif submission_detail.submission.status == 'PENDING' %}bg-secondary
+                                {% else %}bg-secondary
+                                {% endif %}">
+                                {{ submission_detail.submission.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>점수:</strong></td>
+                        <td>{% if submission_detail.submission.score %}{{ submission_detail.submission.score }}/100{% else %}-{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>실행 시간:</strong></td>
+                        <td>{% if submission_detail.submission.execution_time %}{{ submission_detail.submission.execution_time }}ms{% else %}-{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>메모리:</strong></td>
+                        <td>{% if submission_detail.submission.memory_usage %}{{ submission_detail.submission.memory_usage }}KB{% else %}-{% endif %}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 테스트케이스 통과 현황 -->
+        {% if submission_detail.submission.total_testcases > 0 %}
+        <div class="mt-3">
+            <strong>테스트케이스:</strong>
+            {{ submission_detail.submission.passed_testcases }}/{{ submission_detail.submission.total_testcases }} 통과
+            <div class="progress mt-2">
+                <div class="progress-bar 
+                    {% if submission_detail.submission.passed_testcases == submission_detail.submission.total_testcases %}bg-success
+                    {% elif submission_detail.submission.passed_testcases > 0 %}bg-warning
+                    {% else %}bg-danger
+                    {% endif %}"
+                     style="width: {{ (submission_detail.submission.passed_testcases / submission_detail.submission.total_testcases * 100) | round }}%">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 에러 메시지 -->
+{% if submission_detail.submission.compile_message %}
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">컴파일 에러</h5>
+    </div>
+    <div class="card-body">
+        <pre class="mb-0 text-danger"><code>{{ submission_detail.submission.compile_message }}</code></pre>
+    </div>
+</div>
+{% endif %}
+
+{% if submission_detail.submission.runtime_error_type or submission_detail.submission.runtime_error_message %}
+<div class="card mb-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">런타임 에러</h5>
+    </div>
+    <div class="card-body">
+        {% if submission_detail.submission.runtime_error_type %}
+        <p><strong>에러 타입:</strong> {{ submission_detail.submission.runtime_error_type }}</p>
+        {% endif %}
+        {% if submission_detail.submission.runtime_error_message %}
+        <pre class="mb-0 text-danger"><code>{{ submission_detail.submission.runtime_error_message }}</code></pre>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- 테스트케이스별 상세 결과 -->
+{% if submission_detail.testcase_results %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">테스트케이스별 결과</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                <tr>
+                    <th>케이스</th>
+                    <th>결과</th>
+                    <th>실행 시간</th>
+                    <th>메모리</th>
+                    <th>에러 메시지</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for testcase in submission_detail.testcase_results %}
+                <tr>
+                    <td>{{ testcase.testcase_number }}</td>
+                    <td>
+                            <span class="badge 
+                                {% if testcase.status == 'ACCEPTED' %}bg-success
+                                {% elif testcase.status == 'WRONG_ANSWER' %}bg-danger
+                                {% elif testcase.status == 'TIME_LIMIT_EXCEEDED' %}bg-warning
+                                {% elif testcase.status == 'MEMORY_LIMIT_EXCEEDED' %}bg-warning
+                                {% elif testcase.status == 'RUNTIME_ERROR' %}bg-danger
+                                {% else %}bg-secondary
+                                {% endif %}">
+                                {{ testcase.status }}
+                            </span>
+                    </td>
+                    <td>{% if testcase.execution_time %}{{ testcase.execution_time }}ms{% else %}-{% endif %}</td>
+                    <td>{% if testcase.memory_usage %}{{ testcase.memory_usage }}KB{% else %}-{% endif %}</td>
+                    <td class="text-muted">
+                        {% if testcase.error_message %}
+                        <small>{{ testcase.error_message | truncate(length=50) }}</small>
+                        {% else %}-{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- 소스 코드 -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">소스 코드 ({{ submission_detail.submission.language }})</h5>
+    </div>
+    <div class="card-body">
+        <pre class="bg-light p-3 rounded"><code>{{ submission_detail.submission.source_code | default(value="소스 코드를 불러올 수 없습니다.") }}</code></pre>
+    </div>
+</div>
+
+{% endblock content %}

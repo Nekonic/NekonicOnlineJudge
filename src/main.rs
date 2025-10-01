@@ -12,6 +12,7 @@ use crate::auth::Backend;
 
 mod router;
 mod auth;
+mod judge;
 
 #[derive(Clone, axum::extract::FromRef)]
 pub struct AppState {
