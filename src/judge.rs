@@ -60,9 +60,9 @@ pub async fn judge_submission(request: JudgeRequest) -> anyhow::Result<JudgeResu
 
     // 소스 코드 파일 생성
     let source_file = match request.language.as_str() {
-        "cpp" => format!("{}/solution.cpp", temp_dir),
-        "python" => format!("{}/solution.py", temp_dir),
-        "java" => format!("{}/Solution.java", temp_dir),
+        "cpp" => format!("{}/Main.cpp", temp_dir),
+        "python" => format!("{}/Main.py", temp_dir),
+        "java" => format!("{}/Main.java", temp_dir),
         _ => return Err(anyhow::anyhow!("Unsupported language")),
     };
 

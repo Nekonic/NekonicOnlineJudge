@@ -7,7 +7,7 @@ MEMORY_LIMIT=512000  # KB
 
 # 컴파일
 echo "Compiling..."
-if ! g++ -o solution solution.cpp -std=c++17 -O2 -Wall 2>compile_error.txt; then
+if ! g++ -o Main Main.cpp -std=c++17 -O2 -Wall 2>compile_error.txt; then
     echo "COMPILATION_ERROR"
     cat compile_error.txt >&2
     exit 1
@@ -34,7 +34,7 @@ for input_file in /testcases/*.in; do
         echo "Running test case: $(basename $input_file)"
 
         # 시간 및 메모리 제한으로 실행
-        if timeout ${TIMEOUT}s /usr/bin/time -v ./solution < "$input_file" > result.txt 2>time_output.txt; then
+        if timeout ${TIMEOUT}s /usr/bin/time -v ./Main < "$input_file" > result.txt 2>time_output.txt; then
             # 출력 비교
             if [ -f "$output_file" ]; then
                 if diff -w result.txt "$output_file" > /dev/null; then
