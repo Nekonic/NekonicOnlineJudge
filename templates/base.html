@@ -1,55 +1,50 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-bs-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- 템플릿 변수를 사용해 페이지마다 다른 제목을 보여줍니다 -->
   <title>{% block title %}Nekonic OJ{% endblock title %}</title>
 
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-bs-theme', theme);
+    })();
+  </script>
+
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link href="/static/css/bootstrap.css" rel="stylesheet">
 
-  <style>
-    /* Pretendard 폰트를 전체 페이지에 적용 */
-    body {
-      font-family: "Pretendard", sans-serif;
-    }
-    .sidebar {
-      width: 250px;
-      flex-shrink: 0;
-      position: sticky; /* 1. 스티키 포지션 적용 */
-      top: 0;           /* 2. 화면 상단에 고정 */
-      align-self: flex-start; /* 3. d-flex 컨테이너 내에서 상단 정렬 */
-      height: 100vh;    /* 4. 높이는 화면 전체 높이로 유지 */
-    }
-    .content-wrapper {
-      max-width: 960px;
-      margin: 0 auto; /* 가운데 정렬 */
-    }
-  </style>
+  <link href="/static/css/custom.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 <div class="d-flex">
   <!-- 사이드바 (모든 페이지 공통) -->
-  <aside class="sidebar vh-100 p-3 d-flex flex-column bg-dark text-white">
-    <a href="/" class="d-flex align-items-center mb-3 text-white text-decoration-none">
+  <aside class="sidebar p-3 d-flex flex-column">
+    <a href="/" class="d-flex align-items-center mb-3 text-decoration-none">
       <span class="fs-4">Nekonic OJ</span>
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
-      <!-- 'active_page' 변수를 받아와서 현재 페이지 메뉴를 활성화합니다 -->
-      <li class="nav-item"><a href="/learn" class="nav-link text-white {% if active_page == 'learn' %}active{% endif %}">학습</a></li>
-      <li><a href="/community" class="nav-link text-white {% if active_page == 'community' %}active{% endif %}">게시판</a></li>
-      <li><a href="/problems" class="nav-link text-white {% if active_page == 'problems' %}active{% endif %}">문제</a></li>
-      <li><a href="/contests" class="nav-link text-white {% if active_page == 'contests' %}active{% endif %}">대회</a></li>
-      <li><a href="/rankings" class="nav-link text-white {% if active_page == 'rankings' %}active{% endif %}">랭킹</a></li>
+      <li class="nav-item"><a href="/learn" class="nav-link {% if active_page == 'learn' %}active{% endif %}">학습</a></li>
+      <li><a href="/community" class="nav-link {% if active_page == 'community' %}active{% endif %}">게시판</a></li>
+      <li><a href="/problems" class="nav-link {% if active_page == 'problems' %}active{% endif %}">문제</a></li>
+      <li><a href="/contests" class="nav-link {% if active_page == 'contests' %}active{% endif %}">대회</a></li>
+      <li><a href="/rankings" class="nav-link {% if active_page == 'rankings' %}active{% endif %}">랭킹</a></li>
     </ul>
+    <div class="theme-toggle-wrapper">
+      <button id="theme-toggle" class="btn btn-theme-toggle" aria-label="테마 변경">
+        <span class="theme-icon">🌙</span>
+        <span class="theme-text">다크 모드</span>
+      </button>
+    </div>
     <div class="dropdown">
       {% if current_user %}
-      <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
         <strong>{{ current_user.username }}</strong>
       </a>
-      <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+      <ul class="dropdown-menu text-small shadow">
         <li><a class="dropdown-item" href="/logout">로그아웃</a></li>
       </ul>
       {% else %}
@@ -61,13 +56,12 @@
     </div>
   </aside>
 
-  <!-- 3. 메인 콘텐츠 영역 수정 -->
   <main class="flex-grow-1 p-4 p-md-5">
-    <div class="content-wrapper">
-      {% block content %}{% endblock content %}
-    </div>
+    {% block content %}{% endblock content %}
   </main>
 </div>
 <script src="/static/js/bootstrap.bundle.js"></script>
+<script src="/static/js/theme.js"></script>
+<script src="/static/js/animations.js"></script>
 </body>
 </html>

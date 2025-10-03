@@ -228,6 +228,7 @@ struct SubmissionForm {
 #[derive(Debug, Serialize)]
 struct SubmissionStatus {
     id: i64,
+    problem_id: u32,
     username: String,
     language: String,
     status: String,
@@ -431,25 +432,16 @@ async fn submission_detail(
     // 동적 쿼리 사용
     let submission_row = sqlx::query(
         r#"
-        SELECT
-            s.id,
-            u.username,
-            s.language,
-            s.status,
-            s.score,
-            s.execution_time,
-            s.memory_usage,
-            s.compile_message,
-            s.runtime_error_type,
-            s.runtime_error_message,
-            s.total_testcases,
-            s.passed_testcases,
-            datetime(s.created_at, 'localtime') as submitted_at,
-            datetime(s.judged_at, 'localtime') as judged_at
-        FROM submissions s
-        JOIN users u ON s.user_id = u.id
-        WHERE s.id = ?
-        "#
+    SELECT
+        s.id,
+        s.problem_id,  -- 🔥 이 줄 추가
+        u.username,
+        s.language,
+        // ... 나머지
+    FROM submissions s
+    JOIN users u ON s.user_id = u.id
+    WHERE s.id = ?
+    "#
     )
         .bind(submission_id)
         .fetch_one(&state.db_pool)
@@ -457,6 +449,7 @@ async fn submission_detail(
 
     let submission = SubmissionStatus {
         id: submission_row.get("id"),
+        problem_id: submission_row.get("problem_id"),
         username: submission_row.get("username"),
         language: submission_row.get("language"),
         status: submission_row.get("status"),
@@ -568,6 +561,7 @@ async fn problem_status(
         .into_iter()
         .map(|row| SubmissionStatus {
             id: row.get("id"),
+            problem_id,
             username: row.get("username"),
             language: row.get("language"),
             status: row.get("status"),

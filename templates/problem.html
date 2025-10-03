@@ -5,8 +5,8 @@
 {% block content %}
 <!-- 상단 메뉴 -->
 <ul class="nav nav-tabs mb-4">
-  <li class="nav-item"><a class="nav-link active" href="#" onclick="showTab('problem-tab')">문제</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" onclick="showTab('submit-tab')">제출</a></li>
+  <li class="nav-item"><a class="nav-link active" href="#" onclick="showTab('problem-tab', this); return false;">문제</a></li>
+  <li class="nav-item"><a class="nav-link" href="#" onclick="showTab('submit-tab', this); return false;">제출</a></li>
   <li class="nav-item"><a class="nav-link" href="/problems/{{ problem.id }}/status">채점 현황</a></li>
   <li class="nav-item"><a class="nav-link" href="#">게시판</a></li>
 </ul>
@@ -48,7 +48,7 @@
       <div class="col-md-6 mb-3">
         <div class="card">
           <div class="card-header"><strong>예제 입력 {{ i + 1 }}</strong></div>
-          <div class="card-body bg-light">
+          <div class="card-body">
             <pre class="mb-0"><code>{{ problem.example_inputs[i] | default(value="") }}</code></pre>
           </div>
         </div>
@@ -56,7 +56,7 @@
       <div class="col-md-6 mb-3">
         <div class="card">
           <div class="card-header"><strong>예제 출력 {{ i + 1 }}</strong></div>
-          <div class="card-body bg-light">
+          <div class="card-body">
             <pre class="mb-0"><code>{{ problem.example_outputs[i] | default(value="") }}</code></pre>
           </div>
         </div>
@@ -91,22 +91,5 @@
   </div>
   {% endif %}
 </div>
-
-<script>
-  function showTab(tabId) {
-    // 모든 탭 숨기기
-    document.getElementById('problem-tab').style.display = 'none';
-    document.getElementById('submit-tab').style.display = 'none';
-
-    // 선택한 탭 보이기
-    document.getElementById(tabId).style.display = 'block';
-
-    // 탭 메뉴 활성화 상태 변경
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.classList.remove('active');
-    });
-    event.target.classList.add('active');
-  }
-</script>
 
 {% endblock content %}

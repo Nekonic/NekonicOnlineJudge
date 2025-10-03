@@ -15,7 +15,7 @@
     {% if problem_status.submissions %}
     <div class="table-responsive">
       <table class="table table-hover mb-0">
-        <thead class="table-light">
+        <thead>
         <tr>
           <th>제출 번호</th>
           <th>사용자</th>
@@ -29,33 +29,33 @@
         </thead>
         <tbody>
         {% for submission in problem_status.submissions %}
-        <tr style="cursor: pointer;" onclick="window.location.href='/submissions/{{ submission.id }}'">
+        <tr style="cursor: pointer;">
           <td><a href="/submissions/{{ submission.id }}" class="text-decoration-none">#{{ submission.id }}</a></td>
           <td>{{ submission.username }}</td>
           <td>{{ submission.language }}</td>
           <td>
-                            <span class="badge
-                                {% if submission.status == 'ACCEPTED' %}bg-success
-                                {% elif submission.status == 'WRONG_ANSWER' %}bg-danger
-                                {% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}bg-warning text-dark
-                                {% elif submission.status == 'MEMORY_LIMIT_EXCEEDED' %}bg-warning text-dark
-                                {% elif submission.status == 'RUNTIME_ERROR' %}bg-danger
-                                {% elif submission.status == 'COMPILATION_ERROR' %}bg-dark
-                                {% elif submission.status == 'PENDING' %}bg-secondary
-                                {% elif submission.status == 'JUDGING' %}bg-info
-                                {% else %}bg-secondary
-                                {% endif %}">
-                                {% if submission.status == 'ACCEPTED' %}정답
-                                {% elif submission.status == 'WRONG_ANSWER' %}오답
-                                {% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}시간 초과
-                                {% elif submission.status == 'MEMORY_LIMIT_EXCEEDED' %}메모리 초과
-                                {% elif submission.status == 'RUNTIME_ERROR' %}런타임 에러
-                                {% elif submission.status == 'COMPILATION_ERROR' %}컴파일 에러
-                                {% elif submission.status == 'PENDING' %}대기 중
-                                {% elif submission.status == 'JUDGING' %}채점 중
-                                {% else %}{{ submission.status }}
-                                {% endif %}
-                            </span>
+            <span class="badge
+                {% if submission.status == 'ACCEPTED' %}bg-success
+                {% elif submission.status == 'WRONG_ANSWER' %}bg-danger
+                {% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}bg-warning text-dark
+                {% elif submission.status == 'MEMORY_LIMIT_EXCEEDED' %}bg-warning text-dark
+                {% elif submission.status == 'RUNTIME_ERROR' %}bg-danger
+                {% elif submission.status == 'COMPILATION_ERROR' %}bg-warning text-dark
+                {% elif submission.status == 'PENDING' %}bg-secondary
+                {% elif submission.status == 'JUDGING' %}bg-info
+                {% else %}bg-secondary
+                {% endif %}">
+                {% if submission.status == 'ACCEPTED' %}정답
+                {% elif submission.status == 'WRONG_ANSWER' %}오답
+                {% elif submission.status == 'TIME_LIMIT_EXCEEDED' %}시간 초과
+                {% elif submission.status == 'MEMORY_LIMIT_EXCEEDED' %}메모리 초과
+                {% elif submission.status == 'RUNTIME_ERROR' %}런타임 에러
+                {% elif submission.status == 'COMPILATION_ERROR' %}컴파일 에러
+                {% elif submission.status == 'PENDING' %}대기 중
+                {% elif submission.status == 'JUDGING' %}채점 중
+                {% else %}{{ submission.status }}
+                {% endif %}
+            </span>
           </td>
           <td>
             {% if submission.score %}{{ submission.score }}/100
