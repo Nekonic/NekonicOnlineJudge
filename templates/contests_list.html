@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}대회 목록 - Nekonic OJ{% endblock title %}
+
+{% block content %}
+<h1 class="mb-4">대회 목록</h1>
+
+{% if contests %}
+<div class="row">
+  {% for contest in contests %}
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">{{ contest.title }}</h5>
+        <p class="card-text text-muted">{{ contest.description }}</p>
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="badge bg-primary">{{ contest.contest_type }}</span>
+          <a href="/contests/{{ contest.id }}" class="btn btn-sm btn-outline-primary">참가하기</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+  <p>등록된 대회가 없습니다.</p>
+</div>
+{% endif %}
+{% endblock content %}

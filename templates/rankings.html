@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}랭킹 - Nekonic OJ{% endblock title %}
+{% block content %}
+<h1 class="mb-4">랭킹</h1>
+
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item">
+    <a class="nav-link {% if user_type == "individual" %}active{% endif %}" href="/rankings?user_type=individual">개인</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if user_type == "school" %}active{% endif %}" href="/rankings?user_type=school">학교</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if user_type == "company" %}active{% endif %}" href="/rankings?user_type=company">기업</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if user_type == "club" %}active{% endif %}" href="/rankings?user_type=club">소모임</a>
+  </li>
+</ul>
+
+<table class="table table-hover">
+  <thead>
+  <tr>
+    <th>순위</th>
+    <th>사용자</th>
+    <th style="cursor: pointer;" onclick="sortColumn('rating')">
+      레이팅
+      {% if sort_by == "rating" %}
+        {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
+      {% endif %}
+    </th>
+    <th style="cursor: pointer;" onclick="sortColumn('solved_count')">
+      해결 문제 수
+      {% if sort_by == "solved_count" %}
+        {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
+      {% endif %}
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for entry in rankings %}
+  <tr>
+    <td>{{ entry.rank }}</td>
+    <td>{{ entry.username }}</td>
+    <td>{{ entry.rating }}</td>
+    <td>{{ entry.solved_count }}</td>
+  </tr>
+  {% else %}
+  <tr>
+    <td colspan="4" class="text-center">등록된 사용자가 없습니다.</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<script>
+function sortColumn(column) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentSortBy = urlParams.get('sort_by') || 'rating';
+  const currentSortOrder = urlParams.get('sort_order') || 'desc';
+  const userType = urlParams.get('user_type') || 'individual';
+
+  let newSortOrder = 'desc';
+  if (currentSortBy === column && currentSortOrder === 'desc') {
+    newSortOrder = 'asc';
+  }
+
+  window.location.href = `/rankings?user_type=${userType}&sort_by=${column}&sort_order=${newSortOrder}`;
+}
+</script>
+
+{% endblock content %}

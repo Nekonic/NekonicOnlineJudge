@@ -13,6 +13,9 @@ use crate::auth::Backend;
 mod router;
 mod auth;
 mod judge;
+mod error;
+mod models;
+mod handlers;
 
 #[derive(Clone, axum::extract::FromRef)]
 pub struct AppState {
@@ -71,4 +74,3 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-
