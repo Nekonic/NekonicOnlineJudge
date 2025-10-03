@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}내 그룹{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>내 그룹</h1>
+
+    <h2 class="mt-4">가입된 그룹</h2>
+    <div class="row">
+        {% for org in organizations %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ org.name }}</h5>
+                    <p class="card-text">{{ org.description }}</p>
+                    <a href="/organizations/{{ org.id }}" class="btn btn-sm btn-primary">상세보기</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-muted">가입된 그룹이 없습니다.</p>
+        {% endfor %}
+    </div>
+
+    {% if pending_organizations %}
+    <h2 class="mt-5">승인 대기 중인 그룹</h2>
+    <div class="row">
+        {% for org in pending_organizations %}
+        <div class="col-md-4 mb-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h5 class="card-title">{{ org.name }}</h5>
+                    <p class="card-text">{{ org.description }}</p>
+                    <span class="badge bg-warning">승인 대기</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <a href="/organizations" class="btn btn-secondary mt-3">그룹 목록으로</a>
+</div>
+{% endblock %}

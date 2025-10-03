@@ -16,6 +16,7 @@ mod judge;
 mod error;
 mod models;
 mod handlers;
+mod middleware;
 
 #[derive(Clone, axum::extract::FromRef)]
 pub struct AppState {

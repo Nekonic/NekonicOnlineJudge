@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}관리자 대시보드{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>관리자 대시보드</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">대기 중인 그룹 승인</h5>
+                    <p class="card-text display-4">{{ pending_org_count }}</p>
+                    <a href="/admin/organizations/pending" class="btn btn-primary">확인하기</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">대기 중인 가입 요청</h5>
+                    <p class="card-text display-4">{{ pending_join_count }}</p>
+                    <a href="/admin/join-requests/pending" class="btn btn-primary">확인하기</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h2>최근 관리자 액션</h2>
+        {% if recent_actions %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>관리자</th>
+                    <th>액션 유형</th>
+                    <th>대상</th>
+                    <th>상세</th>
+                    <th>시간</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for action in recent_actions %}
+                <tr>
+                    <td>{{ action.admin_username }}</td>
+                    <td>{{ action.action_type }}</td>
+                    <td>{{ action.target_type }} #{{ action.target_id }}</td>
+                    <td>{{ action.details }}</td>
+                    <td>{{ action.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">관리자 액션 기록이 없습니다.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

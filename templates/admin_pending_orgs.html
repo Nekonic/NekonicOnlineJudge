@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}그룹 승인 대기 목록{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>그룹 승인 대기 목록</h1>
+
+    <div class="mt-4">
+        {% if organizations %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>그룹명</th>
+                    <th>유형</th>
+                    <th>설명</th>
+                    <th>생성일</th>
+                    <th>액션</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for org in organizations %}
+                <tr>
+                    <td>{{ org.id }}</td>
+                    <td>{{ org.name }}</td>
+                    <td>{{ org.type }}</td>
+                    <td>{{ org.description }}</td>
+                    <td>{{ org.created_at }}</td>
+                    <td>
+                        <form method="POST" action="/admin/organizations/{{ org.id }}/review" style="display:inline;">
+                            <input type="hidden" name="action" value="approve">
+                            <button type="submit" class="btn btn-success btn-sm">승인</button>
+                        </form>
+                        <form method="POST" action="/admin/organizations/{{ org.id }}/review" style="display:inline;">
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="btn btn-danger btn-sm">거부</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">승인 대기 중인 그룹이 없습니다.</p>
+        {% endif %}
+    </div>
+
+    <a href="/admin" class="btn btn-secondary mt-3">대시보드로 돌아가기</a>
+</div>
+{% endblock %}

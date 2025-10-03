@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}{{ organization.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>{{ organization.name }}</h1>
+            <p class="lead">{{ organization.description }}</p>
+            <span class="badge bg-secondary">{{ organization.type }}</span>
+        </div>
+        {% if current_user and current_user.role == 'admin' %}
+        <div>
+            <form method="POST" action="/admin/organizations/{{ organization.id }}/delete" style="display:inline;" onsubmit="return confirm('정말로 이 그룹을 삭제하시겠습니까? 모든 관련 데이터가 삭제됩니다.');">
+                <button type="submit" class="btn btn-danger">그룹 삭제</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if current_user and not is_member and not has_pending_request %}
+    <div class="mt-3">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#joinModal">가입 요청</button>
+    </div>
+    {% elif has_pending_request %}
+    <div class="alert alert-info mt-3">
+        가입 요청이 승인 대기 중입니다.
+    </div>
+    {% elif is_member %}
+    <div class="alert alert-success mt-3">
+        이 그룹의 멤버입니다.
+    </div>
+    {% endif %}
+
+    <h2 class="mt-5">멤버 목록</h2>
+
+    {% if current_user %}
+    {% set is_group_admin = false %}
+    {% for member in members %}
+        {% if member.user_id == current_user.id and member.role == 'ADMIN' %}
+            {% set_global is_group_admin = true %}
+        {% endif %}
+    {% endfor %}
+
+    {% if is_group_admin or current_user.role == 'admin' %}
+    <div class="mb-3">
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#inviteModal">멤버 초대</button>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>사용자명</th>
+                <th>역할</th>
+                <th>가입일</th>
+                {% if current_user and (is_group_admin or current_user.role == 'admin') %}
+                <th>관리</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for member in members %}
+            <tr>
+                <td>{{ member.username }}</td>
+                <td>
+                    {% if member.role == 'ADMIN' %}
+                    <span class="badge bg-danger">그룹 관리자</span>
+                    {% else %}
+                    <span class="badge bg-info">멤버</span>
+                    {% endif %}
+                </td>
+                <td>{{ member.joined_at }}</td>
+                {% if current_user and (is_group_admin or current_user.role == 'admin') %}
+                <td>
+                    {% if member.user_id != current_user.id %}
+                        {% if member.role == 'MEMBER' %}
+                        <form method="POST" action="/organizations/{{ organization.id }}/members/{{ member.user_id }}/promote" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-warning" title="그룹 관리자로 승격">승격</button>
+                        </form>
+                        {% elif member.role == 'ADMIN' %}
+                        <form method="POST" action="/organizations/{{ organization.id }}/members/{{ member.user_id }}/demote" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-secondary" title="일반 멤버로 강등">강등</button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="/organizations/{{ organization.id }}/members/{{ member.user_id }}/remove" style="display:inline;" onsubmit="return confirm('{{ member.username }}을(를) 그룹에서 추방하시겠습니까?');">
+                            <button type="submit" class="btn btn-sm btn-danger" title="그룹에서 추방">추방</button>
+                        </form>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- 가입 요청 모달 -->
+<div class="modal fade" id="joinModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="/organizations/{{ organization.id }}/join">
+                <div class="modal-header">
+                    <h5 class="modal-title">그룹 가입 요청</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="message" class="form-label">메시지 (선택사항)</label>
+                        <textarea class="form-control" id="message" name="message" rows="3"
+                                  placeholder="가입 사유를 입력해주세요"></textarea>
+                    </div>
+                    <div class="alert alert-info">
+                        <small>가입 요청 후 관리자 승인이 필요합니다.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="submit" class="btn btn-primary">요청</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 멤버 초대 모달 -->
+<div class="modal fade" id="inviteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="/organizations/{{ organization.id }}/members/invite">
+                <div class="modal-header">
+                    <h5 class="modal-title">멤버 초대</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">사용자명</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                        <small class="text-muted">초대할 사용자의 사용자명을 입력하세요</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">역할</label>
+                        <select class="form-select" id="role" name="role">
+                            <option value="MEMBER">일반 멤버</option>
+                            <option value="ADMIN">그룹 관리자</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="submit" class="btn btn-primary">초대</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

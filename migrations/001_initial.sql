@@ -6,6 +6,7 @@ CREATE TABLE users (
                        username TEXT NOT NULL UNIQUE,
                        password_hash TEXT NOT NULL,
                        user_type VARCHAR(20) DEFAULT 'individual' NOT NULL,
+                       role VARCHAR(20) DEFAULT 'user' NOT NULL,
                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -72,6 +73,56 @@ CREATE TABLE compile_errors (
 );
 
 -- ============================================
+-- 조직/그룹
+-- ============================================
+CREATE TABLE organizations (
+                               id INTEGER PRIMARY KEY AUTOINCREMENT,
+                               name TEXT NOT NULL,
+                               type VARCHAR(20) NOT NULL,
+                               description TEXT,
+                               status VARCHAR(20) DEFAULT 'pending' NOT NULL,
+                               created_by INTEGER,
+                               approved_by INTEGER,
+                               approved_at DATETIME,
+                               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+                               FOREIGN KEY (created_by) REFERENCES users(id),
+                               FOREIGN KEY (approved_by) REFERENCES users(id)
+);
+
+CREATE TABLE user_organizations (
+                                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                    user_id INTEGER NOT NULL,
+                                    organization_id INTEGER NOT NULL,
+                                    role VARCHAR(20) DEFAULT 'MEMBER',
+                                    added_by INTEGER,
+                                    status VARCHAR(20) DEFAULT 'active' NOT NULL,
+                                    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+                                    FOREIGN KEY (user_id) REFERENCES users(id),
+                                    FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+                                    FOREIGN KEY (added_by) REFERENCES users(id),
+                                    UNIQUE(user_id, organization_id)
+);
+
+-- 그룹 가입 요청 테이블
+CREATE TABLE organization_join_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    organization_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending' NOT NULL,
+    message TEXT,
+    requested_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    reviewed_by INTEGER,
+    reviewed_at DATETIME,
+
+    FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES users(id),
+    UNIQUE(organization_id, user_id, status)
+);
+
+-- ============================================
 -- 대회 시스템
 -- ============================================
 CREATE TABLE contests (
@@ -83,10 +134,15 @@ CREATE TABLE contests (
                           contest_type VARCHAR(20) DEFAULT 'RATED',
                           is_public BOOLEAN DEFAULT 1,
                           max_participants INTEGER,
+                          status VARCHAR(20) DEFAULT 'draft' NOT NULL,
+                          requires_approval BOOLEAN DEFAULT 0,
+                          approved_by INTEGER,
+                          approved_at DATETIME,
                           created_by INTEGER NOT NULL,
                           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-                          FOREIGN KEY (created_by) REFERENCES users(id)
+                          FOREIGN KEY (created_by) REFERENCES users(id),
+                          FOREIGN KEY (approved_by) REFERENCES users(id)
 );
 
 CREATE TABLE contest_problems (
@@ -114,26 +170,18 @@ CREATE TABLE contest_participants (
 );
 
 -- ============================================
--- 조직/그룹
+-- 관리자 액션 로그
 -- ============================================
-CREATE TABLE organizations (
-                               id INTEGER PRIMARY KEY AUTOINCREMENT,
-                               name TEXT NOT NULL,
-                               type VARCHAR(20) NOT NULL,
-                               description TEXT,
-                               created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE admin_actions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    admin_id INTEGER NOT NULL,
+    action_type VARCHAR(50) NOT NULL,
+    target_type VARCHAR(50) NOT NULL,
+    target_id INTEGER NOT NULL,
+    details TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-CREATE TABLE user_organizations (
-                                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                    user_id INTEGER NOT NULL,
-                                    organization_id INTEGER NOT NULL,
-                                    role VARCHAR(20) DEFAULT 'MEMBER',
-                                    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-                                    FOREIGN KEY (user_id) REFERENCES users(id),
-                                    FOREIGN KEY (organization_id) REFERENCES organizations(id),
-                                    UNIQUE(user_id, organization_id)
+    FOREIGN KEY (admin_id) REFERENCES users(id)
 );
 
 -- ============================================
@@ -174,6 +222,7 @@ CREATE TABLE ranking_cache (
 -- ============================================
 -- 인덱스
 -- ============================================
+CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_submissions_user_id ON submissions(user_id);
 CREATE INDEX idx_submissions_problem_id ON submissions(problem_id);
 CREATE INDEX idx_submissions_contest_id ON submissions(contest_id);
@@ -183,8 +232,17 @@ CREATE INDEX idx_testcase_results_submission_id ON testcase_results(submission_i
 CREATE INDEX idx_compile_errors_submission_id ON compile_errors(submission_id);
 CREATE INDEX idx_contest_participants_contest_id ON contest_participants(contest_id);
 CREATE INDEX idx_contest_participants_user_id ON contest_participants(user_id);
+CREATE INDEX idx_contests_status ON contests(status);
+CREATE INDEX idx_contests_created_by ON contests(created_by);
 CREATE INDEX idx_user_organizations_user_id ON user_organizations(user_id);
 CREATE INDEX idx_user_organizations_org_id ON user_organizations(organization_id);
+CREATE INDEX idx_organizations_status ON organizations(status);
+CREATE INDEX idx_organizations_created_by ON organizations(created_by);
+CREATE INDEX idx_organization_join_requests_status ON organization_join_requests(status);
+CREATE INDEX idx_organization_join_requests_org_id ON organization_join_requests(organization_id);
+CREATE INDEX idx_organization_join_requests_user_id ON organization_join_requests(user_id);
+CREATE INDEX idx_admin_actions_admin_id ON admin_actions(admin_id);
+CREATE INDEX idx_admin_actions_created_at ON admin_actions(created_at DESC);
 
 -- ============================================
 -- 뷰

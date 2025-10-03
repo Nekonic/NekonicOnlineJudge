@@ -32,6 +32,21 @@
       <li><a href="/problems" class="nav-link {% if active_page == 'problems' %}active{% endif %}">문제</a></li>
       <li><a href="/contests" class="nav-link {% if active_page == 'contests' %}active{% endif %}">대회</a></li>
       <li><a href="/rankings" class="nav-link {% if active_page == 'rankings' %}active{% endif %}">랭킹</a></li>
+
+      {% if current_user %}
+      <li><a href="/organizations" class="nav-link {% if active_page == 'organizations' %}active{% endif %}">그룹</a></li>
+      <li><a href="/organizations/my" class="nav-link {% if active_page == 'my_organizations' %}active{% endif %}">내 그룹</a></li>
+      {% endif %}
+
+      {% if current_user and current_user.role == 'admin' %}
+      <li class="nav-item mt-3">
+        <hr>
+        <small class="text-muted px-3">관리자 메뉴</small>
+      </li>
+      <li><a href="/admin" class="nav-link {% if active_page == 'admin' %}active{% endif %}">🔧 대시보드</a></li>
+      <li><a href="/admin/organizations/pending" class="nav-link {% if active_page == 'admin_orgs' %}active{% endif %}">📋 그룹 승인</a></li>
+      <li><a href="/admin/join-requests/pending" class="nav-link {% if active_page == 'admin_joins' %}active{% endif %}">👥 가입 요청</a></li>
+      {% endif %}
     </ul>
     <div class="theme-toggle-wrapper">
       <button id="theme-toggle" class="btn btn-theme-toggle" aria-label="테마 변경">

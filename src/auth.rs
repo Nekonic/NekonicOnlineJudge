@@ -13,12 +13,27 @@ pub struct Credentials {
     pub password: String,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, sqlx::Type)]
+#[sqlx(type_name = "VARCHAR", rename_all = "lowercase")]
+pub enum UserRole {
+    Admin,
+    User,
+}
+
+impl UserRole {
+    pub fn is_admin(&self) -> bool {
+        matches!(self, UserRole::Admin)
+    }
+}
+
 #[derive(Clone, Debug, Default, sqlx::FromRow, Serialize)]
 pub struct User {
     pub id: i64,
     pub username: String,
     #[serde(skip_serializing)]
     password_hash: String,
+    #[sqlx(default)]
+    pub role: String,
 }
 
 impl AuthUser for User {
@@ -28,6 +43,10 @@ impl AuthUser for User {
 }
 
 impl User {
+    pub fn is_admin(&self) -> bool {
+        self.role == "admin"
+    }
+    
     pub fn verify_password(&self, password: &str) -> bool {
         PasswordHash::new(&self.password_hash)
             .and_then(|hash| Argon2::default().verify_password(password.as_bytes(), &hash))
@@ -70,4 +89,3 @@ impl AuthnBackend for Backend {
             .await
     }
 }
-

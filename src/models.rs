@@ -147,3 +147,106 @@ pub struct RankingEntry {
     pub user_type: String,
 }
 
+// --- Organization/Group Models ---
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct Organization {
+    pub id: i64,
+    pub name: String,
+    pub r#type: String,
+    pub description: Option<String>,
+    pub status: String,
+    pub created_by: Option<i64>,
+    pub approved_by: Option<i64>,
+    pub approved_at: Option<String>,
+    pub created_at: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateOrganizationForm {
+    pub name: String,
+    pub r#type: String,
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct OrganizationMember {
+    pub id: i64,
+    pub user_id: i64,
+    pub username: String,
+    pub role: String,
+    pub status: String,
+    pub joined_at: String,
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct OrganizationJoinRequest {
+    pub id: i64,
+    pub organization_id: i64,
+    pub user_id: i64,
+    pub username: String,
+    pub status: String,
+    pub message: Option<String>,
+    pub requested_at: String,
+    pub reviewed_by: Option<i64>,
+    pub reviewed_at: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct JoinOrganizationForm {
+    pub message: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ReviewRequestForm {
+    pub action: String, // "approve" or "reject"
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AddMemberForm {
+    pub username: String,
+    pub role: Option<String>,
+}
+
+// --- Contest Admin Models ---
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct Contest {
+    pub id: i64,
+    pub title: String,
+    pub description: Option<String>,
+    pub start_time: String,
+    pub end_time: String,
+    pub contest_type: String,
+    pub is_public: bool,
+    pub max_participants: Option<i32>,
+    pub status: String,
+    pub requires_approval: bool,
+    pub created_by: i64,
+    pub approved_by: Option<i64>,
+    pub approved_at: Option<String>,
+    pub created_at: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateContestForm {
+    pub title: String,
+    pub description: Option<String>,
+    pub start_time: String,
+    pub end_time: String,
+    pub contest_type: String,
+    pub is_public: bool,
+    pub max_participants: Option<i32>,
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct AdminAction {
+    pub id: i64,
+    pub admin_id: i64,
+    pub admin_username: String,
+    pub action_type: String,
+    pub target_type: String,
+    pub target_id: i64,
+    pub details: Option<String>,
+    pub created_at: String,
+}
