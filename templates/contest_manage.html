@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}{{ contest.title }} 관리 - Nekonic OJ{% endblock title %}
+
+{% block content %}
+<div class="container">
+  <div class="mb-4">
+    <h1 class="h2">대회 관리</h1>
+    <p class="text-muted">{{ contest.title }}</p>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <!-- 대회 정보 -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">대회 정보</h5>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-3">제목</dt>
+            <dd class="col-sm-9">{{ contest.title }}</dd>
+
+            <dt class="col-sm-3">설명</dt>
+            <dd class="col-sm-9">{{ contest.description }}</dd>
+
+            <dt class="col-sm-3">시작 시간</dt>
+            <dd class="col-sm-9">{{ contest.start_time }}</dd>
+
+            <dt class="col-sm-3">종료 시간</dt>
+            <dd class="col-sm-9">{{ contest.end_time }}</dd>
+
+            <dt class="col-sm-3">대회 유형</dt>
+            <dd class="col-sm-9"><span class="badge bg-primary">{{ contest.contest_type }}</span></dd>
+
+            <dt class="col-sm-3">상태</dt>
+            <dd class="col-sm-9"><span class="badge bg-success">{{ contest.status }}</span></dd>
+          </dl>
+        </div>
+      </div>
+
+      <!-- 문제 목록 -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">문제 목록 ({{ problems|length }}개)</h5>
+        </div>
+        <div class="card-body">
+          {% if problems %}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th style="width: 10%;">#</th>
+                  <th style="width: 15%;">문제 ID</th>
+                  <th style="width: 15%;">배점</th>
+                  <th style="width: 15%;">순서</th>
+                  <th style="width: 15%;">작업</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for problem in problems %}
+                <tr>
+                  <td>{{ loop.index }}</td>
+                  <td>{{ problem.problem_id }}</td>
+                  <td>{{ problem.points }}점</td>
+                  <td>{{ problem.problem_order }}</td>
+                  <td>
+                    <form action="/contests/{{ contest.id }}/problems/{{ problem.id }}/remove" method="post" style="display: inline;">
+                      <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">
+                        삭제
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted mb-0">아직 등록된 문제가 없습니다.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <!-- 문제 추가 -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">문제 추가</h5>
+        </div>
+        <div class="card-body">
+          <form action="/contests/{{ contest.id }}/problems/add" method="post">
+            <div class="mb-3">
+              <label for="problem_id" class="form-label">문제 ID</label>
+              <input type="number" class="form-control" id="problem_id" name="problem_id" required min="1">
+              <div class="form-text">추가할 문제의 ID를 입력하세요 (예: 1001)</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="points" class="form-label">배점</label>
+              <input type="number" class="form-control" id="points" name="points" required min="1" value="100">
+              <div class="form-text">문제의 배점을 입력하세요</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="problem_order" class="form-label">문제 순서</label>
+              <input type="number" class="form-control" id="problem_order" name="problem_order" required min="1" value="{{ problems|length + 1 }}">
+              <div class="form-text">문제의 순서 (A=1, B=2, C=3, ...)</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">문제 추가</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 빠른 작업 -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">빠른 작업</h5>
+        </div>
+        <div class="card-body">
+          <a href="/contests/{{ contest.id }}" class="btn btn-outline-primary w-100 mb-2">
+            <i class="bi bi-eye"></i> 대회 보기
+          </a>
+          <a href="/contests/{{ contest.id }}/standings" class="btn btn-outline-secondary w-100">
+            <i class="bi bi-trophy"></i> 순위표 보기
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

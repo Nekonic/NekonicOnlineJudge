@@ -17,6 +17,7 @@ mod error;
 mod models;
 mod handlers;
 mod middleware;
+mod contest_scoring;
 
 #[derive(Clone, axum::extract::FromRef)]
 pub struct AppState {

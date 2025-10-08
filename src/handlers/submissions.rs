@@ -17,7 +17,7 @@ use crate::{
 use super::problems::load_problem_detail;
 
 pub async fn submit_solution(
-    Path(problem_id): Path<u32>,
+    Path(problem_id): Path<i64>,
     State(state): State<AppState>,
     auth_session: AuthSession<Backend>,
     Form(form): Form<SubmitForm>,
@@ -29,7 +29,7 @@ pub async fn submit_solution(
          VALUES (?, ?, ?, ?, 'PENDING') RETURNING id",
     )
     .bind(user.id)
-    .bind(problem_id as i64)
+    .bind(problem_id)
     .bind(&form.language)
     .bind(&form.source_code)
     .fetch_one(&state.db_pool)
@@ -97,6 +97,18 @@ pub async fn submit_solution(
                     .await;
                 }
             }
+
+            // 대회 제출인 경우 순위 업데이트
+            if let Ok(Some((contest_id, user_id))) = sqlx::query_as::<_, (i64, i64)>(
+                "SELECT contest_id, user_id FROM submissions WHERE id = ? AND contest_id IS NOT NULL"
+            )
+            .bind(submission_id)
+            .fetch_optional(&state.db_pool)
+            .await
+            {
+                // 대회 순위 업데이트
+                let _ = crate::contest_scoring::update_standings(&state.db_pool, contest_id, user_id).await;
+            }
         }
     });
 
@@ -104,7 +116,7 @@ pub async fn submit_solution(
 }
 
 pub async fn problem_status(
-    Path(problem_id): Path<u32>,
+    Path(problem_id): Path<i64>,
     State(state): State<AppState>,
     auth_session: AuthSession<Backend>,
 ) -> Result<Html<String>, AppError> {
@@ -120,7 +132,7 @@ pub async fn problem_status(
          ORDER BY s.created_at DESC
          LIMIT 50",
     )
-    .bind(problem_id as i64)
+    .bind(problem_id)
     .fetch_all(&state.db_pool)
     .await?;
 
@@ -187,4 +199,3 @@ pub async fn submission_detail(
     let html = state.tera.render("submission_detail.html", &context)?;
     Ok(Html(html))
 }
-

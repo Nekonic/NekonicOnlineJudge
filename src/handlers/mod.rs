@@ -9,7 +9,11 @@ pub mod organizations;
 
 // Re-export for convenience
 pub use auth::*;
-pub use contests::*;
+pub use contests::{
+    contests_page, contest_detail, create_contest_page, create_contest_action,
+    register_contest, contest_standings, manage_contest, add_contest_problem,
+    remove_contest_problem, submit_contest_problem, contest_problem_detail,
+};
 pub use home::*;
 pub use problems::*;
 pub use rankings::*;

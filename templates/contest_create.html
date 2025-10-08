@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}새 대회 만들기 - Nekonic OJ{% endblock title %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="mb-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/contests">대회</a></li>
+          <li class="breadcrumb-item active">새 대회 만들기</li>
+        </ol>
+      </nav>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h1 class="h2 mb-4">새 대회 만들기</h1>
+
+        <form action="/contests/create" method="post">
+          <div class="mb-3">
+            <label for="title" class="form-label">대회 제목 <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="title" name="title" required
+                   placeholder="예: 2025 Nekonic Programming Contest">
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label">대회 설명</label>
+            <textarea class="form-control" id="description" name="description" rows="4"
+                      placeholder="대회에 대한 설명을 입력하세요..."></textarea>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="start_time" class="form-label">시작 시간 <span class="text-danger">*</span></label>
+              <input type="datetime-local" class="form-control" id="start_time" name="start_time" required>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="end_time" class="form-label">종료 시간 <span class="text-danger">*</span></label>
+              <input type="datetime-local" class="form-control" id="end_time" name="end_time" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="contest_type" class="form-label">대회 유형 <span class="text-danger">*</span></label>
+              <select class="form-select" id="contest_type" name="contest_type" required>
+                <option value="ICPC">ICPC (ACM)</option>
+                <option value="IOI">IOI (올림피아드)</option>
+                <option value="CTF">CTF (Capture The Flag)</option>
+                <option value="PRACTICE">연습 대회</option>
+              </select>
+              <div class="form-text">
+                ICPC: 푼 문제 수 + 패널티 타임으로 순위 결정
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="max_participants" class="form-label">최대 참가자 수</label>
+              <input type="number" class="form-control" id="max_participants" name="max_participants"
+                     min="1" placeholder="제한 없음 (비워두세요)">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="is_public" name="is_public" value="true" checked>
+              <label class="form-check-label" for="is_public">
+                공개 대회 (모든 사용자가 참가 가능)
+              </label>
+            </div>
+          </div>
+
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            <strong>안내:</strong> 대회는 생성 후 관리자 승인이 필요할 수 있습니다.
+            {% if current_user and current_user.role == "admin" %}
+            관리자 계정으로 생성하는 대회는 즉시 승인됩니다.
+            {% endif %}
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">대회 만들기</button>
+            <a href="/contests" class="btn btn-secondary">취소</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5 class="card-title">다음 단계</h5>
+        <ol class="mb-0">
+          <li>대회 생성 후 대회 관리 페이지에서 문제를 추가하세요.</li>
+          <li>문제의 배점과 순서를 설정할 수 있습니다.</li>
+          <li>대회 시작 전까지 설정을 수정할 수 있습니다.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+

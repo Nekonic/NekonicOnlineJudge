@@ -5,68 +5,255 @@
 
 <ul class="nav nav-tabs mb-4">
   <li class="nav-item">
-    <a class="nav-link {% if user_type == "individual" %}active{% endif %}" href="/rankings?user_type=individual">개인</a>
+    <a class="nav-link {% if not organization_id and not view_type %}active{% endif %}" href="/rankings">전체</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if user_type == "school" %}active{% endif %}" href="/rankings?user_type=school">학교</a>
+    <a class="nav-link {% if view_type == "school" %}active{% endif %}" href="/rankings?view_type=school">학교</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if user_type == "company" %}active{% endif %}" href="/rankings?user_type=company">기업</a>
+    <a class="nav-link {% if view_type == "company" %}active{% endif %}" href="/rankings?view_type=company">기업</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if user_type == "club" %}active{% endif %}" href="/rankings?user_type=club">소모임</a>
+    <a class="nav-link {% if view_type == "club" %}active{% endif %}" href="/rankings?view_type=club">소모임</a>
   </li>
 </ul>
 
-<table class="table table-hover">
-  <thead>
-  <tr>
-    <th>순위</th>
-    <th>사용자</th>
-    <th style="cursor: pointer;" onclick="sortColumn('rating')">
-      레이팅
-      {% if sort_by == "rating" %}
-        {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
-      {% endif %}
-    </th>
-    <th style="cursor: pointer;" onclick="sortColumn('solved_count')">
-      해결 문제 수
-      {% if sort_by == "solved_count" %}
-        {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
-      {% endif %}
-    </th>
-  </tr>
-  </thead>
-  <tbody>
-  {% for entry in rankings %}
-  <tr>
-    <td>{{ entry.rank }}</td>
-    <td>{{ entry.username }}</td>
-    <td>{{ entry.rating }}</td>
-    <td>{{ entry.solved_count }}</td>
-  </tr>
-  {% else %}
-  <tr>
-    <td colspan="4" class="text-center">등록된 사용자가 없습니다.</td>
-  </tr>
-  {% endfor %}
-  </tbody>
-</table>
+{% if view_type %}
+{# 조직 타입별 랭킹 테이블 #}
+<div class="alert alert-info mb-4">
+  <i class="bi bi-info-circle"></i>
+  {% if view_type == "school" %}학교{% elif view_type == "company" %}기업{% else %}소모임{% endif %} 간의 랭킹을 비교하고 있습니다.
+  조직 이름을 클릭하면 해당 조직의 사용자 랭킹을 볼 수 있습니다.
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover">
+    <thead>
+    <tr>
+      <th style="width: 80px;">순위</th>
+      <th>
+        {% if view_type == "school" %}학교명
+        {% elif view_type == "company" %}기업명
+        {% else %}소모임명
+        {% endif %}
+      </th>
+      <th style="cursor: pointer; width: 150px;" onclick="sortOrgColumn('total_rating')">
+        레이팅의 합
+        {% if sort_by == "total_rating" %}
+          {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
+        {% endif %}
+      </th>
+      <th style="cursor: pointer; width: 150px;" onclick="sortOrgColumn('avg_rating')">
+        평균 레이팅
+        {% if sort_by == "avg_rating" %}
+          {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
+        {% endif %}
+      </th>
+      <th style="cursor: pointer; width: 120px;" onclick="sortOrgColumn('member_count')">
+        인원
+        {% if sort_by == "member_count" %}
+          {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
+        {% endif %}
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for org in organization_rankings %}
+    <tr style="cursor: pointer;" onclick="window.location.href='/rankings?organization_id={{ org.id }}'">
+      <td class="fw-bold">
+        {% if org.rank == 1 %}
+        <span class="text-warning">🥇 {{ org.rank }}</span>
+        {% elif org.rank == 2 %}
+        <span class="text-secondary">🥈 {{ org.rank }}</span>
+        {% elif org.rank == 3 %}
+        <span style="color: #cd7f32;">🥉 {{ org.rank }}</span>
+        {% else %}
+        {{ org.rank }}
+        {% endif %}
+      </td>
+      <td>
+        <a href="/rankings?organization_id={{ org.id }}" class="text-decoration-none">
+          <strong>{{ org.name }}</strong>
+        </a>
+      </td>
+      <td>{{ org.total_rating }}</td>
+      <td>{{ org.avg_rating }}</td>
+      <td>{{ org.member_count }}명</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="5" class="text-center text-muted py-4">
+        등록된
+        {% if view_type == "school" %}학교
+        {% elif view_type == "company" %}기업
+        {% else %}소모임
+        {% endif %}
+        가 없습니다.
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
 
 <script>
-function sortColumn(column) {
+function sortOrgColumn(column) {
   const urlParams = new URLSearchParams(window.location.search);
-  const currentSortBy = urlParams.get('sort_by') || 'rating';
+  const viewType = urlParams.get('view_type');
+  const currentSortBy = urlParams.get('sort_by') || 'avg_rating';
   const currentSortOrder = urlParams.get('sort_order') || 'desc';
-  const userType = urlParams.get('user_type') || 'individual';
 
   let newSortOrder = 'desc';
   if (currentSortBy === column && currentSortOrder === 'desc') {
     newSortOrder = 'asc';
   }
 
-  window.location.href = `/rankings?user_type=${userType}&sort_by=${column}&sort_order=${newSortOrder}`;
+  window.location.href = `/rankings?view_type=${viewType}&sort_by=${column}&sort_order=${newSortOrder}`;
 }
 </script>
+
+{% elif organization_id %}
+{# 특정 조직의 사용자 랭킹 #}
+<div class="alert alert-info mb-4">
+  <i class="bi bi-building"></i>
+  {% for org in organizations_school %}{% if org.id == organization_id %}<strong>{{ org.name }}</strong> (학교){% endif %}{% endfor %}
+  {% for org in organizations_company %}{% if org.id == organization_id %}<strong>{{ org.name }}</strong> (기업){% endif %}{% endfor %}
+  {% for org in organizations_club %}{% if org.id == organization_id %}<strong>{{ org.name }}</strong> (소모임){% endif %}{% endfor %}
+  의 사용자 랭킹
+  <a href="/rankings" class="alert-link ms-2">← 돌아가기</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover">
+    <thead>
+    <tr>
+      <th style="width: 80px;">순위</th>
+      <th>사용자</th>
+      <th style="cursor: pointer; width: 150px;" onclick="sortColumn('rating')">
+        레이팅
+        {% if sort_by == "rating" %}
+          {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
+        {% endif %}
+      </th>
+      <th style="cursor: pointer; width: 150px;" onclick="sortColumn('solved_count')">
+        해결 문제 수
+        {% if sort_by == "solved_count" %}
+          {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
+        {% endif %}
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for entry in rankings %}
+    <tr>
+      <td class="fw-bold">
+        {% if entry.rank == 1 %}
+        <span class="text-warning">🥇 {{ entry.rank }}</span>
+        {% elif entry.rank == 2 %}
+        <span class="text-secondary">🥈 {{ entry.rank }}</span>
+        {% elif entry.rank == 3 %}
+        <span style="color: #cd7f32;">🥉 {{ entry.rank }}</span>
+        {% else %}
+        {{ entry.rank }}
+        {% endif %}
+      </td>
+      <td>{{ entry.username }}</td>
+      <td>{{ entry.rating }}</td>
+      <td>{{ entry.solved_count }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="4" class="text-center text-muted py-4">
+        이 조직에 속한 사용자가 없습니다.
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+function sortColumn(column) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const organizationId = urlParams.get('organization_id');
+  const currentSortBy = urlParams.get('sort_by') || 'rating';
+  const currentSortOrder = urlParams.get('sort_order') || 'desc';
+
+  let newSortOrder = 'desc';
+  if (currentSortBy === column && currentSortOrder === 'desc') {
+    newSortOrder = 'asc';
+  }
+
+  window.location.href = `/rankings?organization_id=${organizationId}&sort_by=${column}&sort_order=${newSortOrder}`;
+}
+</script>
+
+{% else %}
+{# 전체 사용자 랭킹 #}
+<div class="table-responsive">
+  <table class="table table-hover">
+    <thead>
+    <tr>
+      <th style="width: 80px;">순위</th>
+      <th>사용자</th>
+      <th style="cursor: pointer; width: 150px;" onclick="sortColumn('rating')">
+        레이팅
+        {% if sort_by == "rating" %}
+          {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
+        {% endif %}
+      </th>
+      <th style="cursor: pointer; width: 150px;" onclick="sortColumn('solved_count')">
+        해결 문제 수
+        {% if sort_by == "solved_count" %}
+          {% if sort_order == "desc" %}▼{% else %}▲{% endif %}
+        {% endif %}
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for entry in rankings %}
+    <tr>
+      <td class="fw-bold">
+        {% if entry.rank == 1 %}
+        <span class="text-warning">🥇 {{ entry.rank }}</span>
+        {% elif entry.rank == 2 %}
+        <span class="text-secondary">🥈 {{ entry.rank }}</span>
+        {% elif entry.rank == 3 %}
+        <span style="color: #cd7f32;">🥉 {{ entry.rank }}</span>
+        {% else %}
+        {{ entry.rank }}
+        {% endif %}
+      </td>
+      <td>{{ entry.username }}</td>
+      <td>{{ entry.rating }}</td>
+      <td>{{ entry.solved_count }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="4" class="text-center text-muted py-4">
+        등록된 사용자가 없습니다.
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+function sortColumn(column) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentSortBy = urlParams.get('sort_by') || 'rating';
+  const currentSortOrder = urlParams.get('sort_order') || 'desc';
+
+  let newSortOrder = 'desc';
+  if (currentSortBy === column && currentSortOrder === 'desc') {
+    newSortOrder = 'asc';
+  }
+
+  window.location.href = `/rankings?sort_by=${column}&sort_order=${newSortOrder}`;
+}
+</script>
+
+{% endif %}
 
 {% endblock content %}

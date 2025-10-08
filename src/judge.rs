@@ -14,7 +14,7 @@ pub struct JudgeRequest {
     pub submission_id: i64,
     pub language: String,
     pub source_code: String,
-    pub problem_id: u32,
+    pub problem_id: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -80,7 +80,7 @@ pub async fn judge_submission(request: JudgeRequest) -> anyhow::Result<JudgeResu
 async fn run_docker_judge_with_bollard(
     language: &str,
     temp_dir: &str,
-    problem_id: u32
+    problem_id: i64
 ) -> anyhow::Result<JudgeResult> {
     let docker = Docker::connect_with_local_defaults()?;
 

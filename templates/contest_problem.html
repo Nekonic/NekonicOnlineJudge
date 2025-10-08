@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}문제 {{ problem_order }} - {{ contest.title }}{% endblock title %}
+
+{% block content %}
+<div class="mb-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/contests">대회</a></li>
+      <li class="breadcrumb-item"><a href="/contests/{{ contest.id }}">{{ contest.title }}</a></li>
+      <li class="breadcrumb-item active">문제 {{ problem_order }}</li>
+    </ol>
+  </nav>
+</div>
+
+<div class="alert alert-info mb-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <i class="bi bi-trophy"></i>
+      <strong>대회 문제</strong> - {{ contest.title }}
+    </div>
+    <div>
+      <span class="badge bg-primary">{{ points }}점</span>
+      <a href="/contests/{{ contest.id }}/standings" class="btn btn-sm btn-outline-primary ms-2">순위표</a>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h1 class="h2 mb-4">문제 {{ problem_order }}</h1>
+
+        <div class="alert alert-warning">
+          <i class="bi bi-info-circle"></i>
+          이 문제는 대회 문제입니다. 일반 문제 페이지와 동일하게 풀이할 수 있습니다.
+        </div>
+
+        <p class="text-muted">문제 ID: {{ problem_id }}</p>
+
+        <div class="d-flex gap-2">
+          <a href="/problems/{{ problem_id }}" class="btn btn-primary">문제 보기 및 제출</a>
+          <a href="/contests/{{ contest.id }}" class="btn btn-outline-secondary">대회로 돌아가기</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">문제 정보</h6>
+      </div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-6">순서</dt>
+          <dd class="col-6">{{ problem_order }}</dd>
+
+          <dt class="col-6">배점</dt>
+          <dd class="col-6">{{ points }}점</dd>
+
+          <dt class="col-6">대회</dt>
+          <dd class="col-6">{{ contest.title }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

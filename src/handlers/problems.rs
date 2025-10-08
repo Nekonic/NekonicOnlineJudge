@@ -53,7 +53,7 @@ async fn get_problems_from_fs(state: &AppState) -> Result<Vec<ProblemListItem>, 
             let problem_id = problem_folder
                 .file_name()
                 .to_string_lossy()
-                .parse::<u32>()
+                .parse::<i64>()
                 .ok();
 
             if problem_id.is_none() {
@@ -106,7 +106,7 @@ async fn get_problems_from_fs(state: &AppState) -> Result<Vec<ProblemListItem>, 
 }
 
 pub async fn problem_detail(
-    Path(id): Path<u32>,
+    Path(id): Path<i64>,
     State(state): State<AppState>,
     auth_session: AuthSession<Backend>,
 ) -> Result<Html<String>, AppError> {
@@ -123,7 +123,7 @@ pub async fn problem_detail(
     Ok(Html(html))
 }
 
-pub async fn load_problem_detail(id: u32, state: &AppState) -> Result<ProblemDetail, AppError> {
+pub async fn load_problem_detail(id: i64, state: &AppState) -> Result<ProblemDetail, AppError> {
     // 1001 -> 001000 폴더 (1000단위로 내림)
     let folder_num = (id / 1000) * 1000;
     let problem_path = std::path::Path::new("./problems")

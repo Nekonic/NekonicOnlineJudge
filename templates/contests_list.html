@@ -3,28 +3,116 @@
 {% block title %}대회 목록 - Nekonic OJ{% endblock title %}
 
 {% block content %}
-<h1 class="mb-4">대회 목록</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>대회 목록</h1>
+  {% if current_user %}
+  <a href="/contests/create" class="btn btn-primary">새 대회 만들기</a>
+  {% endif %}
+</div>
 
-{% if contests %}
-<div class="row">
-  {% for contest in contests %}
-  <div class="col-md-6 mb-4">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">{{ contest.title }}</h5>
-        <p class="card-text text-muted">{{ contest.description }}</p>
-        <div class="d-flex justify-content-between align-items-center">
-          <span class="badge bg-primary">{{ contest.contest_type }}</span>
-          <a href="/contests/{{ contest.id }}" class="btn btn-sm btn-outline-primary">참가하기</a>
+<!-- 진행 중인 대회 -->
+{% if active_contests %}
+<section class="mb-5">
+  <h2 class="h3 mb-3">
+    <span class="badge bg-success me-2">진행중</span>
+    진행 중인 대회
+  </h2>
+  <div class="row">
+    {% for contest in active_contests %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card border-success h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ contest.title }}</h5>
+          <p class="card-text text-muted small">{{ contest.description | default(value="설명 없음") | truncate(length=80) }}</p>
+          <div class="mb-2">
+            <small class="text-muted">
+              <i class="bi bi-calendar-event"></i> 시작: {{ contest.start_time }}<br>
+              <i class="bi bi-calendar-check"></i> 종료: {{ contest.end_time }}
+            </small>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="badge bg-primary">{{ contest.contest_type }}</span>
+            <a href="/contests/{{ contest.id }}" class="btn btn-sm btn-success">참가하기</a>
+          </div>
         </div>
       </div>
     </div>
+    {% endfor %}
   </div>
-  {% endfor %}
-</div>
-{% else %}
+</section>
+{% endif %}
+
+<!-- 예정된 대회 -->
+{% if upcoming_contests %}
+<section class="mb-5">
+  <h2 class="h3 mb-3">
+    <span class="badge bg-info me-2">예정</span>
+    예정된 대회
+  </h2>
+  <div class="row">
+    {% for contest in upcoming_contests %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card border-info h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ contest.title }}</h5>
+          <p class="card-text text-muted small">{{ contest.description | default(value="설명 없음") | truncate(length=80) }}</p>
+          <div class="mb-2">
+            <small class="text-muted">
+              <i class="bi bi-calendar-event"></i> 시작: {{ contest.start_time }}<br>
+              <i class="bi bi-calendar-check"></i> 종료: {{ contest.end_time }}
+            </small>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="badge bg-primary">{{ contest.contest_type }}</span>
+            <a href="/contests/{{ contest.id }}" class="btn btn-sm btn-info">상세보기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- 종료된 대회 -->
+{% if ended_contests %}
+<section class="mb-5">
+  <h2 class="h3 mb-3">
+    <span class="badge bg-secondary me-2">종료</span>
+    종료된 대회
+  </h2>
+  <div class="row">
+    {% for contest in ended_contests %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card border-secondary h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ contest.title }}</h5>
+          <p class="card-text text-muted small">{{ contest.description | default(value="설명 없음") | truncate(length=80) }}</p>
+          <div class="mb-2">
+            <small class="text-muted">
+              <i class="bi bi-calendar-event"></i> 시작: {{ contest.start_time }}<br>
+              <i class="bi bi-calendar-check"></i> 종료: {{ contest.end_time }}
+            </small>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="badge bg-primary">{{ contest.contest_type }}</span>
+            <a href="/contests/{{ contest.id }}" class="btn btn-sm btn-secondary">결과보기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if not active_contests and not upcoming_contests and not ended_contests %}
 <div class="text-center py-5 text-muted">
-  <p>등록된 대회가 없습니다.</p>
+  <i class="bi bi-trophy" style="font-size: 3rem;"></i>
+  <p class="mt-3">아직 등록된 대회가 없습니다.</p>
+  {% if current_user %}
+  <a href="/contests/create" class="btn btn-primary mt-2">첫 대회 만들기</a>
+  {% endif %}
 </div>
 {% endif %}
 {% endblock content %}

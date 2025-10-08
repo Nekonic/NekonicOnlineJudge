@@ -30,6 +30,12 @@ pub fn create_router() -> Router<AppState> {
         .route("/organizations/:org_id/members/:member_id/demote", post(handlers::demote_to_member))
         .route("/organizations/:org_id/members/:member_id/remove", post(handlers::remove_member))
         .route("/organizations/:org_id/members/invite", post(handlers::invite_member))
+        // 대회 관리 라우트 추가
+        .route("/contests/:id/manage", get(handlers::manage_contest))
+        .route("/contests/:id/problems/add", post(handlers::add_contest_problem))
+        .route("/contests/:contest_id/problems/:problem_id/remove", post(handlers::remove_contest_problem))
+        .route("/contests/:contest_id/problems/:problem_id", get(handlers::contest_problem_detail))
+        .route("/contests/:contest_id/problems/:problem_id/submit", post(handlers::submit_contest_problem))
         .layer(middleware::from_fn(app_middleware::require_auth));
 
     Router::new()
@@ -51,6 +57,10 @@ pub fn create_router() -> Router<AppState> {
         .route("/rankings", get(handlers::rankings_page))
         // Contests
         .route("/contests", get(handlers::contests_page))
+        .route("/contests/create", get(handlers::create_contest_page).post(handlers::create_contest_action))
+        .route("/contests/:id", get(handlers::contest_detail))
+        .route("/contests/:id/register", post(handlers::register_contest))
+        .route("/contests/:id/standings", get(handlers::contest_standings))
         // Organizations (public routes)
         .route("/organizations", get(handlers::list_organizations))
         .route("/organizations/:id", get(handlers::organization_detail))
