@@ -8,17 +8,24 @@
   <li class="nav-item"><a class="nav-link active" href="#" onclick="showTab('problem-tab', this); return false;">문제</a></li>
   <li class="nav-item"><a class="nav-link" href="#" onclick="showTab('submit-tab', this); return false;">제출</a></li>
   <li class="nav-item"><a class="nav-link" href="/problems/{{ problem.id }}/status">채점 현황</a></li>
-  <li class="nav-item"><a class="nav-link" href="#">게시판</a></li>
+  <li class="nav-item"><a class="nav-link" href="/boards/3?problem={{ problem.id }}">질문게시판</a></li>
 </ul>
 
 <!-- 문제 탭 내용 -->
 <div id="problem-tab">
   <!-- 문제 제목 -->
-  <div class="d-flex align-items-center mb-3">
-    <h1 class="me-3 mb-0">{{ problem.meta.title }}</h1>
-    {% for tag in problem.meta.tags %}
-    <span class="badge rounded-pill bg-secondary fw-normal">{{ tag }}</span>
-    {% endfor %}
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="d-flex align-items-center">
+      <h1 class="me-3 mb-0">{{ problem.meta.title }}</h1>
+      {% for tag in problem.meta.tags %}
+      <span class="badge rounded-pill bg-secondary fw-normal">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% if current_user %}
+    <a href="/boards/3/posts/new?problem_id={{ problem.id }}" class="btn btn-outline-primary">
+      <i class="bi bi-question-circle"></i> 질문하기
+    </a>
+    {% endif %}
   </div>
 
   <!-- 문제 정보 테이블 -> 카드로 변경 -->

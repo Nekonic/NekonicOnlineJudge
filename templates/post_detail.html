@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- 게시판 네비게이션 -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/boards">게시판</a></li>
+                    <li class="breadcrumb-item"><a href="/boards/{{ board.id }}">{{ board.name }}</a></li>
+                    <li class="breadcrumb-item active">{{ post.title }}</li>
+                </ol>
+            </nav>
+
+            <!-- 게시글 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">{{ post.title }}</h3>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div>
+                            <small class="text-muted">
+                                <i class="bi bi-person"></i> {{ post.username }} |
+                                <i class="bi bi-clock"></i> {{ post.created_at }} |
+                                <i class="bi bi-eye"></i> {{ post.view_count }}
+                            </small>
+                        </div>
+                        {% if is_author or role == "admin" %}
+                        <div>
+                            <a href="/boards/{{ board.id }}/posts/{{ post.id }}/edit" class="btn btn-sm btn-outline-primary">수정</a>
+                            <form method="post" action="/boards/{{ board.id }}/posts/{{ post.id }}/delete" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if post.problem_id %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-link"></i> 관련 문제:
+                        <a href="/problems/{{ post.problem_id }}" class="alert-link">문제 #{{ post.problem_id }}</a>
+                    </div>
+                    {% endif %}
+
+                    <div class="post-content" style="white-space: pre-wrap;">{{ post.content }}</div>
+                </div>
+                <div class="card-footer">
+                    {% if current_user %}
+                    <form method="post" action="/boards/{{ board.id }}/posts/{{ post.id }}/like" style="display:inline;">
+                        <button type="submit" class="btn btn-sm {% if user_liked %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                            <i class="bi bi-heart{% if user_liked %}-fill{% endif %}"></i>
+                            좋아요 ({{ like_count }})
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted">
+                        <i class="bi bi-heart"></i> {{ like_count }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 댓글 작성 -->
+            {% if current_user %}
+            {% if not post.is_locked %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">댓글 작성</h5>
+                    <form method="post" action="/boards/{{ board.id }}/posts/{{ post.id }}/comments">
+                        <input type="hidden" name="parent_comment_id" value="">
+                        <div class="mb-3">
+                            <textarea class="form-control" name="content" rows="3" required placeholder="댓글을 입력하세요..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">댓글 달기</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <!-- 댓글 목록 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">댓글 ({{ comments|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if comments|length == 0 %}
+                    <p class="text-muted text-center py-3">첫 댓글을 작성해보세요!</p>
+                    {% else %}
+                    {% for comment in comments %}
+                    <div class="comment mb-3 {% if comment.parent_comment_id %}ms-5{% endif %}" id="comment-{{ comment.id }}">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <strong>{{ comment.username }}</strong>
+                                    <small class="text-muted">{{ comment.created_at }}</small>
+                                </div>
+                                <div class="mt-2" style="white-space: pre-wrap;">{{ comment.content }}</div>
+                                {% if comment.is_answer %}
+                                <span class="badge bg-success mt-2">채택된 답변</span>
+                                {% endif %}
+                                {% if comment.like_count > 0 %}
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-heart"></i> {{ comment.like_count }}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if not loop.last %}
+                    <hr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 목록으로 돌아가기 -->
+            <div class="mt-4 mb-4">
+                <a href="/boards/{{ board.id }}" class="btn btn-secondary">
+                    <i class="bi bi-list"></i> 목록으로
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

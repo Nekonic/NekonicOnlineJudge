@@ -245,21 +245,108 @@ CREATE INDEX idx_admin_actions_admin_id ON admin_actions(admin_id);
 CREATE INDEX idx_admin_actions_created_at ON admin_actions(created_at DESC);
 
 -- ============================================
+-- 게시판 시스템
+-- ============================================
+CREATE TABLE boards (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    board_type VARCHAR(20) NOT NULL, -- 'announcement', 'free', 'qna', 'organization'
+    organization_id INTEGER,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
+);
+
+CREATE TABLE posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    board_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    problem_id INTEGER, -- 문제 관련 게시글인 경우
+    contest_id INTEGER, -- 대회 관련 게시글인 경우
+    is_pinned BOOLEAN DEFAULT 0, -- 공지 고정
+    is_locked BOOLEAN DEFAULT 0, -- 댓글 잠금
+    view_count INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (contest_id) REFERENCES contests(id)
+);
+
+CREATE TABLE comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    parent_comment_id INTEGER, -- 대댓글 지원
+    content TEXT NOT NULL,
+    is_answer BOOLEAN DEFAULT 0, -- Q&A 채택 답변
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (parent_comment_id) REFERENCES comments(id) ON DELETE CASCADE
+);
+
+CREATE TABLE post_likes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE(post_id, user_id)
+);
+
+CREATE TABLE comment_likes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    comment_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE(comment_id, user_id)
+);
+
+-- 게시판 인덱스
+CREATE INDEX idx_posts_board_id ON posts(board_id);
+CREATE INDEX idx_posts_user_id ON posts(user_id);
+CREATE INDEX idx_posts_problem_id ON posts(problem_id);
+CREATE INDEX idx_posts_contest_id ON posts(contest_id);
+CREATE INDEX idx_posts_created_at ON posts(created_at DESC);
+CREATE INDEX idx_posts_is_pinned ON posts(is_pinned);
+CREATE INDEX idx_comments_post_id ON comments(post_id);
+CREATE INDEX idx_comments_user_id ON comments(user_id);
+CREATE INDEX idx_comments_parent_comment_id ON comments(parent_comment_id);
+CREATE INDEX idx_post_likes_post_id ON post_likes(post_id);
+CREATE INDEX idx_post_likes_user_id ON post_likes(user_id);
+CREATE INDEX idx_comment_likes_comment_id ON comment_likes(comment_id);
+CREATE INDEX idx_comment_likes_user_id ON comment_likes(user_id);
+
+-- 기본 게시판 생성
+INSERT INTO boards (name, board_type, description) VALUES
+('공지사항', 'announcement', '시스템 공지사항'),
+('자유게시판', 'free', '자유롭게 이야기를 나누는 공간입니다'),
+('질문게시판', 'qna', '문제 관련 질문을 하는 곳입니다');
+
+-- ============================================
 -- 뷰
 -- ============================================
 CREATE VIEW submission_stats AS
 SELECT
     problem_id,
     COUNT(*) as total_submissions,
-    COUNT(CASE WHEN status = 'ACCEPTED' THEN 1 END) as accepted_submissions,
-    ROUND(
-            CAST(COUNT(CASE WHEN status = 'ACCEPTED' THEN 1 END) AS FLOAT) /
-            CAST(COUNT(*) AS FLOAT) * 100, 3
-    ) as acceptance_rate,
+    SUM(CASE WHEN status = 'ACCEPTED' THEN 1 ELSE 0 END) as accepted_submissions,
+    CAST(SUM(CASE WHEN status = 'ACCEPTED' THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*) * 100 as acceptance_rate,
     AVG(CASE WHEN status = 'ACCEPTED' THEN execution_time END) as avg_execution_time,
     AVG(CASE WHEN status = 'ACCEPTED' THEN memory_usage END) as avg_memory_usage
 FROM submissions
-WHERE status != 'PENDING'
 GROUP BY problem_id;
 
 -- ============================================

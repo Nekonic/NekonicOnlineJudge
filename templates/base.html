@@ -28,7 +28,7 @@
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
       <li class="nav-item"><a href="/learn" class="nav-link {% if active_page == 'learn' %}active{% endif %}">학습</a></li>
-      <li><a href="/community" class="nav-link {% if active_page == 'community' %}active{% endif %}">게시판</a></li>
+      <li><a href="/boards" class="nav-link {% if active_page == 'boards' %}active{% endif %}">게시판</a></li>
       <li><a href="/problems" class="nav-link {% if active_page == 'problems' %}active{% endif %}">문제</a></li>
       <li><a href="/contests" class="nav-link {% if active_page == 'contests' %}active{% endif %}">대회</a></li>
       <li><a href="/rankings" class="nav-link {% if active_page == 'rankings' %}active{% endif %}">랭킹</a></li>
@@ -38,7 +38,8 @@
       <li><a href="/organizations/my" class="nav-link {% if active_page == 'my_organizations' %}active{% endif %}">내 그룹</a></li>
       {% endif %}
 
-      {% if current_user and current_user.role == 'admin' %}
+      {% if current_user %}
+      {% if current_user.role == 'admin' %}
       <li class="nav-item mt-3">
         <hr>
         <small class="text-muted px-3">관리자 메뉴</small>
@@ -46,6 +47,7 @@
       <li><a href="/admin" class="nav-link {% if active_page == 'admin' %}active{% endif %}">🔧 대시보드</a></li>
       <li><a href="/admin/organizations/pending" class="nav-link {% if active_page == 'admin_orgs' %}active{% endif %}">📋 그룹 승인</a></li>
       <li><a href="/admin/join-requests/pending" class="nav-link {% if active_page == 'admin_joins' %}active{% endif %}">👥 가입 요청</a></li>
+      {% endif %}
       {% endif %}
     </ul>
     <div class="theme-toggle-wrapper">

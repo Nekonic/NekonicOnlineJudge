@@ -460,3 +460,123 @@ pub struct AdminAction {
     pub details: Option<String>,
     pub created_at: String,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct InviteMemberForm {
+    pub username: String,
+}
+
+// --- Contest Models ---
+
+// ...existing code...
+
+// --- Board Models ---
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct Board {
+    pub id: i64,
+    pub name: String,
+    pub board_type: String,
+    pub organization_id: Option<i64>,
+    pub description: Option<String>,
+    pub created_at: String,
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct Post {
+    pub id: i64,
+    pub board_id: i64,
+    pub user_id: i64,
+    pub username: String,
+    pub title: String,
+    pub content: String,
+    pub problem_id: Option<i64>,
+    pub contest_id: Option<i64>,
+    pub is_pinned: bool,
+    pub is_locked: bool,
+    pub view_count: i64,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct PostWithStats {
+    pub id: i64,
+    pub board_id: i64,
+    pub user_id: i64,
+    pub username: String,
+    pub title: String,
+    pub problem_id: Option<i64>,
+    pub contest_id: Option<i64>,
+    pub is_pinned: bool,
+    pub is_locked: bool,
+    pub view_count: i64,
+    pub created_at: String,
+    pub comment_count: i64,
+    pub like_count: i64,
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct Comment {
+    pub id: i64,
+    pub post_id: i64,
+    pub user_id: i64,
+    pub username: String,
+    pub parent_comment_id: Option<i64>,
+    pub content: String,
+    pub is_answer: bool,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct CommentWithStats {
+    pub id: i64,
+    pub post_id: i64,
+    pub user_id: i64,
+    pub username: String,
+    pub parent_comment_id: Option<i64>,
+    pub content: String,
+    pub is_answer: bool,
+    pub created_at: String,
+    pub updated_at: String,
+    pub like_count: i64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreatePostForm {
+    pub title: String,
+    pub content: String,
+    #[serde(deserialize_with = "deserialize_optional_i32")]
+    pub problem_id: Option<i32>,
+    #[serde(deserialize_with = "deserialize_optional_i32")]
+    pub contest_id: Option<i32>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct NewPostQuery {
+    #[serde(deserialize_with = "deserialize_optional_i32")]
+    #[serde(default)]
+    pub problem_id: Option<i32>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdatePostForm {
+    pub title: String,
+    pub content: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateCommentForm {
+    pub content: String,
+    #[serde(deserialize_with = "deserialize_optional_i32")]
+    pub parent_comment_id: Option<i32>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct BoardsQuery {
+    #[serde(default)]
+    pub page: Option<i64>,
+    #[serde(default)]
+    pub search: Option<String>,
+}

@@ -36,6 +36,15 @@ pub fn create_router() -> Router<AppState> {
         .route("/contests/:contest_id/problems/:problem_id/remove", post(handlers::remove_contest_problem))
         .route("/contests/:contest_id/problems/:problem_id", get(handlers::contest_problem_detail))
         .route("/contests/:contest_id/problems/:problem_id/submit", post(handlers::submit_contest_problem))
+        // 게시판 라우트 (인증 필요)
+        .route("/boards/:board_id/posts/new", get(handlers::new_post_form))
+        .route("/boards/:board_id/posts", post(handlers::create_post))
+        .route("/boards/:board_id/posts/:post_id/edit", get(handlers::edit_post_form))
+        .route("/boards/:board_id/posts/:post_id/update", post(handlers::update_post))
+        .route("/boards/:board_id/posts/:post_id/delete", post(handlers::delete_post))
+        .route("/boards/:board_id/posts/:post_id/comments", post(handlers::create_comment))
+        .route("/boards/:board_id/posts/:post_id/like", post(handlers::toggle_post_like))
+        .route("/boards/:board_id/posts/:post_id/comments/:comment_id/like", post(handlers::toggle_comment_like))
         .layer(middleware::from_fn(app_middleware::require_auth));
 
     Router::new()
@@ -64,6 +73,10 @@ pub fn create_router() -> Router<AppState> {
         // Organizations (public routes)
         .route("/organizations", get(handlers::list_organizations))
         .route("/organizations/:id", get(handlers::organization_detail))
+        // Boards (public routes)
+        .route("/boards", get(handlers::boards_list))
+        .route("/boards/:board_id", get(handlers::board_posts))
+        .route("/boards/:board_id/posts/:post_id", get(handlers::post_detail))
         // Merge protected routes
         .merge(admin_routes)
         .merge(auth_required_routes)
